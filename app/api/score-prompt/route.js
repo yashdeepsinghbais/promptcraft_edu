@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server'
-import axios from 'axios'
+import { NextResponse } from 'next/server';
+import axios from 'axios';
 
 export async function POST(req) {
-  const { prompt } = await req.json()
+  console.log("🚀 API HIT!");
 
-  console.log("🔥 Prompt sent to server:", prompt)
+  try {
+    const body = await req.json();
+    console.log("🧠 Incoming prompt:", body.prompt);
 
-  const systemPrompt = `
+    const systemPrompt = `
 You are a Prompt Expert AI designed to help users write better prompts for LLMs.
 
 Analyze the given prompt and do the following:
@@ -31,9 +33,8 @@ Suggestions to Improve:
 ...  
 **Revised Prompt:**  
 ...
-  `
+`;
 
-  try {
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
@@ -45,24 +46,24 @@ Suggestions to Improve:
           },
           {
             role: 'user',
-            content: prompt,
+            content: body.prompt, // 🔥 fixed here!
           },
         ],
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
           'Content-Type': 'application/json',
         },
       }
-    )
+    );
 
-    const aiReply = response.data.choices[0].message.content
-    console.log("✅ AI Reply:", aiReply)
-    return NextResponse.json({ result: aiReply })
+    const aiReply = response.data.choices[0].message.content;
+    console.log("✅ AI Reply:", aiReply);
+    return NextResponse.json({ result: aiReply });
 
   } catch (error) {
-    console.error('🔥 Error in API call:', error.response?.data || error.message)
-    return NextResponse.json({ error: 'Failed to fetch AI response.' }, { status: 500 })
+    console.error('🔥 Error in API call:', error.response?.data || error.message);
+    return NextResponse.json({ error: 'Failed to fetch AI response.' }, { status: 500 });
   }
 }
