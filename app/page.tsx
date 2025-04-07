@@ -1,103 +1,107 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [prompt, setPrompt] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSubmit = async () => {
+    if (!prompt.trim()) return;
+    setIsLoading(true);
+    setAiResponse('');
+
+    try {
+      const res = await fetch('/api/score-prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setAiResponse(data.result);
+      } else {
+        setAiResponse('❌ Failed to get feedback from AI.');
+      }
+    } catch {
+      setAiResponse('⚠️ Error: Could not connect to the server.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 via-white to-green-100 py-10">
+      <div className="max-w-3xl mx-auto p-6 bg-white shadow-xl rounded-xl border border-yellow-200">
+        <div className="mb-6 text-center">
+          <h1 className="text-4xl font-bold mb-2">🎓 PromptCraft EDU</h1>
+          <p className="text-gray-700">
+            Learn how to write better prompts and become a Prompt Master! 🧠✨
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <div className="mb-4">
+          <p className="mb-2 font-semibold">🧑‍🏫 What Makes a Good Prompt?</p>
+          <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+            <li><strong>Beginner</strong>: General request (e.g., &quot;Explain photosynthesis&quot;).</li>
+            <li><strong>Intermediate</strong>: Slightly focused (e.g., &quot;Explain photosynthesis for 8th grade&quot;).</li>
+            <li><strong>Advanced</strong>: Specific + style + audience (e.g., &quot;Explain photosynthesis using a short story for 8th graders with fun analogies&quot;).</li>
+          </ul>
+        </div>
+
+        <textarea
+          className="w-full border border-gray-300 rounded-md p-3 mb-4"
+          rows={5}
+          placeholder="✍️ Try this: Explain Newton&apos;s first law like I’m a 10-year-old..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+        />
+
+        <button
+          onClick={handleSubmit}
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {isLoading ? 'Scoring your prompt...' : 'Analyze My Prompt 🚀'}
+        </button>
+
+        {aiResponse && (
+          <div className="mt-6 bg-gray-100 p-4 rounded-xl space-y-4">
+            <h2 className="text-xl font-semibold">📚 AI Feedback</h2>
+            <p><strong>🧮 Score:</strong> {aiResponse.match(/Score:\s*(\d+\/\d+)/)?.[1] ?? 'N/A'}</p>
+            <p><strong>🎯 Level:</strong> {aiResponse.match(/Level:\s*(.*)/)?.[1] ?? 'N/A'}</p>
+
+            <div>
+              <h3 className="font-semibold">🔍 Key Issues:</h3>
+              <ul className="list-disc list-inside">
+                {aiResponse
+                  .split('\n')
+                  .filter(line => line.trim().match(/^\d+\./))
+                  .map((line, idx) => (
+                    <li key={idx}>{line.replace(/^\d+\.\s*/, '')}</li>
+                  ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold">💡 Suggestions to Improve:</h3>
+              <p>{aiResponse.includes('Suggestions to Improve:') ? 
+                aiResponse.split('Suggestions to Improve:')[1].split('**Revised Prompt:**')[0].trim()
+                : 'No suggestions provided.'}</p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold">📝 Improved Prompt:</h3>
+              <pre className="bg-white p-3 rounded whitespace-pre-wrap">
+                {aiResponse.split('**Revised Prompt:**')[1]?.trim() ?? 'N/A'}
+              </pre>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
